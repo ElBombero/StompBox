@@ -2,7 +2,6 @@
 #include "Logger.h"
 //#include <stdio.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
 #include <sstream>
@@ -52,7 +51,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Opening port: " + port);
         m_port = port;
         m_speed = speed;
-        m_fd = open(m_port.c_str(), O_RDWR | O_NONBLOCK);
+        m_fd = open(m_port.c_str(), c_defaultOpenFlags);
         //m_fd = open("/dev/ttyAMA0", O_RDWR);
         if (m_fd < 0)
         {

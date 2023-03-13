@@ -9,6 +9,7 @@
 //#include <cstdlib>
 //#include <fstream>
 #include <termios.h>
+#include <fcntl.h>
 
 class SerialPort
 {
