@@ -1,6 +1,6 @@
 #include "DFPlayer.h"
-
-#pragma once
+#include "SerialPort.h"
+#include "Logger.h"
 
 #include <vector>
 #include <string>
@@ -8,15 +8,19 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 //#include <stdio.h>
 //#include <fcntl.h>
 //#include <unistd.h>
 
 
-void DFPlayer::SendCommand(std::vector<uint8_t>& commandData, ECommand command, uint16_t paramWL = 0, uint8_t paramH = 0, bool feedback = false)
+void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, bool feedback)
 {
+    std::string logSource = "DFPlayer::SendCommand";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Building command message...");
+
     uint8_t paramL = 0;
-    commandData.clear();
+    std::vector<uint8_t> commandData;
 
     commandData.push_back(static_cast<uint8_t>(ESpecialTokens::Token_Start));   // $S 
     commandData.push_back(static_cast<uint8_t>(command));                       // command ID
@@ -45,7 +49,41 @@ void DFPlayer::SendCommand(std::vector<uint8_t>& commandData, ECommand command, 
     CalculateCommandChecksum(commandData);
     commandData.push_back(static_cast<uint8_t>(ESpecialTokens::Token_End));   // $O
 
-    Instance().WriteCommand(commandData);
+
+    std::string message = "";
+    HexDump(commandData, message);
+
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, message);
+
+    Instance().m_serialPort->WriteMessage(commandData);
+}
+
+void DFPlayer::HexDump(const char* buffer, size_t bufferSize, std::string& output)
+{
+    output = "";
+    char buff[16];
+    for (size_t i = 0; i < bufferSize; ++i)
+    {
+        //sprintf(buff, "\\x%02x", buffer[i]);
+        sprintf(buff, "%02x ", buffer[i]);
+        output += buff;
+    }
+
+    //Logger::Log(Logger::ELogLevel::Log_Debug, "HexTump", output);
+}
+
+void DFPlayer::HexDump(const std::vector<uint8_t>&buffer, std::string& output)
+{
+    output = "";
+    char buff[16];
+    for (auto byte : buffer)
+    {
+        //sprintf(buffer, "\\x%02x", byte);
+        sprintf(buff, "%02x ", byte);
+        output += buff;
+    }
+
+    //Logger::Log(Logger::ELogLevel::Log_Debug, "HexTump", output);
 }
 
 DFPlayer& DFPlayer::Instance()
@@ -55,49 +93,7 @@ DFPlayer& DFPlayer::Instance()
     return s_instance;
 }
 
-bool DFPlayer::WriteCommand(const std::vector<uint8_t>& commandData)
-{
-    if (m_file == nullptr)
-    {
-        return false;
-    }
-    size_t dataSize = commandData.size();
-    if (fwrite(static_cast<const void*>(&commandData.begin()), dataSize, dataSize, m_file) != dataSize)
-    {
-        return false;
-    }
-    fflush(m_file);
-    if (std::ferror(m_file))
-    {
-        return false;
-    }
-    return true;
-}
 
-// ToDo: implement (buffer the data!)
-bool DFPlayer::ReadResponse()
-{
-    // TBD
-    return false;
-}
-
-// ToDo: configure port from config parameter
-bool DFPlayer::Initialize(std::string port, std::string config)
-{
-    if ((!m_port.empty() && (m_port.compare(port) != 0)) ||
-        (!m_portConfig.empty() && (m_portConfig.compare(config) != 0)))
-    {
-        ClosePort();
-    }
-    if (m_file == nullptr)
-    {
-        m_port = port;
-        m_portConfig = config;
-        m_file = fopen(m_port.c_str(), "r+");
-        // TBD
-        // configure port parameters using m_portConfig
-    }
-}
 void DFPlayer::CalculateCommandChecksum(std::vector<uint8_t>& commandData)
 {
     uint16_t sum = 0;
@@ -113,23 +109,34 @@ void DFPlayer::CalculateCommandChecksum(std::vector<uint8_t>& commandData)
     commandData.push_back(static_cast<uint8_t>(sum & 0x00ff));                  // Checksum lower 8 bits
 }
 
+void DFPlayer::ReadResponse()
+{
+    std::vector<uint8_t> response;
+    m_serialPort->ReadResponse(response);
+
+    std::string output = "";
+    HexDump(response, output);
+    Logger::Log(Logger::ELogLevel::Log_Debug, "DFPlayer::ReadResponse", output);
+}
+
 
 DFPlayer::DFPlayer() :
-    m_port(""),
-    m_file(nullptr)
+    m_serialPort(new SerialPort())
 {
+    std::string logSource = "DFPlayer::DFPlayer";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "created");
+}
+
+void DFPlayer::InitializeSerialPort(std::string port, std::string config)
+{
+    m_serialPort->Initialize(port, config);
 }
 
 DFPlayer::~DFPlayer()
 {
-    ClosePort();
-}
-
-void DFPlayer::ClosePort()
-{
-    if (m_file != nullptr)
-    {
-        fclose(m_file);
-    }
-    m_file = nullptr;
+    std::string logSource = "DFPlayer::~DFPlayer";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Destructing DFPlayer");
+    m_serialPort->Close();
+    m_serialPort = nullptr;
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "DFPlayer destructed");
 }

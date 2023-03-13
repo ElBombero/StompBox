@@ -1,14 +1,18 @@
+#ifndef __cplusplus
+#define __cplusplus
+#endif // defined __cplusplus
+
 #pragma once
 
 #include <vector>
 #include <string>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
+#include <memory>
+#include "SerialPort.h"
 //#include <stdio.h>
 //#include <fcntl.h>
 //#include <unistd.h>
+
+
 
 class DFPlayer
 {
@@ -86,25 +90,20 @@ public:
         Token_End = 0xef
     };
 
-    static DFPlayer& Instance();
 
-    static void SendCommand(std::vector<uint8_t>& commandData, ECommand command, uint16_t paramWL = 0, uint8_t paramH = 0, bool feedback = false);
-    bool WriteCommand(const std::vector<uint8_t>& commandData);
-    // ToDo: implement (buffer the data!)
-    bool ReadResponse();
-    // ToDo: configure port from config parameter
-    bool Initialize(std::string port, std::string config);
+    static DFPlayer& Instance();
+    ~DFPlayer();
+    void InitializeSerialPort(std::string port, std::string config);
+
+    static void SendCommand(ECommand command, uint16_t paramWL = 0, uint8_t paramH = 0, bool feedback = false);
+    void ReadResponse();
+    static void HexDump(const char* buffer, size_t bufferSize, std::string& output);
+    static void HexDump(const std::vector<uint8_t>& buffer, std::string& output);
 
 private:
+    DFPlayer();
+
     static void CalculateCommandChecksum(std::vector<uint8_t>& commandData);
 
-
-    DFPlayer();
-    ~DFPlayer();
-
-    void ClosePort();
-
-    FILE* m_file;
-    std::string m_port;
-    std::string m_portConfig;
+    std::unique_ptr<SerialPort> m_serialPort;
 };

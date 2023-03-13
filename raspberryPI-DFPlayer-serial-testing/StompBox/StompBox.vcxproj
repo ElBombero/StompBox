@@ -77,9 +77,12 @@
   <ItemGroup>
     <ClCompile Include="DFPlayer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SerialPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DFPlayer.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="SerialPort.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

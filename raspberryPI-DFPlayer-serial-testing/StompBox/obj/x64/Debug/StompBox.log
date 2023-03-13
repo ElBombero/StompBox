@@ -1,1 +1,56 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Microsoft\VC\v170\Application Type\Linux\1.0\Linux.targets(160,5): error : There are no remote machines configured for remote builds. Please configure a machine using Tools | Options | Cross Platform | Connection Manager.
+﻿  Validating sources
+  Copying sources remotely to '192.168.100.252'
+  Validating architecture
+  Validating architecture
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Application Type\Linux\1.0\Linux.targets(202,5): warning : Current project architecture 'x64' is incompatible with the remote system architecture 'ARM' ('armv7l'). Please switch the project architecture to 'ARM' in Configuration Manager. If you are cross-compiling you can ignore this warning.
+  Starting remote build
+  Compiling sources:
+  DFPlayer.cpp
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(3,9): warning : #pragma once in main file
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(3,9): warning :  #pragma once
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(3,9): warning :          ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Next’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning :      switch (command)
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning :             ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Previous’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Volume_Inc’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Volume_Dec’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Standby’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Normal’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Reset’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Playback’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Command_Pause’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_STAY_I’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_STAY_II’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_STAY_III’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Init_Params’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Reply’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Status’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Volume’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Eq’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_PlaybackMode’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_SW_Version’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Total_TF_Card_Files_Count’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Total_U_Disk_Files_Count’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Total_Flash_Files_Count’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Total_Keep_On’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Track_on_TF_Card’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Track_on_U_Disk’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(24,12): warning : enumeration value ‘Query_Current_Track_on_Flash’ not handled in switch [-Wswitch]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(115,1): warning : no return statement in function returning non-void [-Wreturn-type]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(115,1): warning :  }
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(115,1): warning :  ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(123,17): warning : conversion to ‘uint16_t {aka short unsigned int}’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(123,17): warning :              sum += *it;
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(123,17): warning :                  ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(126,9): warning : conversion to ‘uint16_t {aka short unsigned int}’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(126,9): warning :      sum *= -1;
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(126,9): warning :          ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.h(106,17): warning : ‘DFPlayer::m_port’ will be initialized after [-Wreorder]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.h(105,11): warning : ‘FILE* DFPlayer::m_file’ [-Wreorder]
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.h(105,11): warning :      FILE* m_file;
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.h(105,11): warning :            ^
+C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\DFPlayer.cpp(132,1): warning : when initialized here [-Wreorder]
+  main.cpp
+  Linking objects
+  StompBox.vcxproj -> C:\Users\Marcel\Projects\StompBox\raspberryPI-DFPlayer-serial-testing\StompBox\bin\x64\Debug\StompBox.out
