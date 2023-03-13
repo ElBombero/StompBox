@@ -9,8 +9,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <sstream>
-
 
 
 DFPlayer::DFPlayer() :
@@ -38,23 +36,7 @@ DFPlayer& DFPlayer::Instance()
 
 void DFPlayer::InitializeSerialPort(const std::string& port, const std::string& config)
 {
-    std::vector<std::string> strings;
-    std::istringstream f(config);
-    std::string s;
-    while (getline(f, s, c_configStringSeparator)) {
-        //cout << s << endl;
-        strings.push_back(s);
-    }
-    speed_t speed = B9600;
-    if (strings.size >= 1)
-    {
-        std::string
-        switch (strings[0])
-        {
-        case "9600":
-        }
-    }
-    m_serialPort->Initialize(port, B9600);
+    m_serialPort->Initialize(port, config);
 }
 
 void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, bool feedback)

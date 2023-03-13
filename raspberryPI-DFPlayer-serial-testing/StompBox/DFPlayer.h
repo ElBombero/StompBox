@@ -105,5 +105,4 @@ private:
 
     static void CalculateCommandChecksum(std::vector<uint8_t>& commandData);
     std::unique_ptr<SerialPort> m_serialPort;
-    const char c_configStringSeparator = ';';
 };

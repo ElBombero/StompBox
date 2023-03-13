@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <sstream>
 
 
 // ToDo: implement (buffer the data!)
@@ -95,6 +96,54 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
     }
     Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Port initialized OK");
     return true;
+}
+
+bool SerialPort::Initialize(const std::string& port, const std::string& config)
+{
+    std::vector<std::string> strings;
+    std::istringstream f(config);
+    std::string s;
+    while (getline(f, s, c_configStringSeparator))
+    {
+        //cout << s << endl;
+        strings.push_back(s);
+    }
+    speed_t speed = c_defaultSpeed;
+    if (strings.size() >= 1)
+    {
+        std::string speedStr = strings[0];
+        if (speedStr == "9600") speed = B9600;              // The most common setting first
+        else if (speedStr == "50") speed = B50;
+        else if (speedStr == "75") speed = B75;
+        else if (speedStr == "110") speed = B110;
+        else if (speedStr == "134") speed = B134;
+        else if (speedStr == "150") speed = B150;
+        else if (speedStr == "200") speed = B200;
+        else if (speedStr == "300") speed = B300;
+        else if (speedStr == "600") speed = B600;
+        else if (speedStr == "1800") speed = B1800;
+        else if (speedStr == "2400") speed = B2400;
+        else if (speedStr == "4800") speed = B4800;
+        else if (speedStr == "19200") speed = B19200;
+        else if (speedStr == "38400") speed = B38400;
+        else if (speedStr == "57600") speed = B57600;
+        else if (speedStr == "115200") speed = B115200;
+        else if (speedStr == "230400") speed = B230400;
+        else if (speedStr == "460800") speed = B460800;
+        else if (speedStr == "500000") speed = B500000;
+        else if (speedStr == "576000") speed = B576000;
+        else if (speedStr == "921600") speed = B921600;
+        else if (speedStr == "1000000") speed = B1000000;
+        else if (speedStr == "1152000") speed = B1152000;
+        else if (speedStr == "1500000") speed = B1500000;
+        else if (speedStr == "2000000") speed = B2000000;
+        else if (speedStr == "2500000") speed = B2500000;
+        else if (speedStr == "3000000") speed = B3000000;
+        else if (speedStr == "3500000") speed = B3500000;
+        else if (speedStr == "4000000") speed = B4000000;
+    }
+
+    Initialize(port, speed);
 }
 
 bool SerialPort::WriteMessage(const std::vector<uint8_t>& messageData) const
