@@ -29,10 +29,10 @@ public:
 
     enum class PlaybackMode
     {
-        Mode_Repeat = 0x00,
-        Mode_RepeatFolder = 0x01,
-        Mode_RepeatSingle = 0x02,
-        Mode_Random
+        Mode_Repeat         = 0x00,
+        Mode_RepeatFolder   = 0x01,
+        Mode_RepeatSingle   = 0x02,
+        Mode_Random         = 0x03
     };
 
     enum class PlaybackSource
@@ -87,7 +87,8 @@ public:
     enum class ESpecialTokens
     {
         Token_Start = 0x7e,
-        Token_End = 0xef
+        Token_End = 0xef,
+        Token_Version = 0xff
     };
 
 
@@ -105,4 +106,5 @@ private:
 
     static void CalculateCommandChecksum(std::vector<uint8_t>& commandData);
     std::unique_ptr<SerialPort> m_serialPort;
+    //static const uint8_t c_versionDF = 0xff;
 };

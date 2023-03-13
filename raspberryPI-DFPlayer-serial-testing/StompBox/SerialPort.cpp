@@ -99,6 +99,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
 
 bool SerialPort::Initialize(const std::string& port, const std::string& config)
 {
+    std::string logSource = "SerialPort::Initialize(2)";
     std::vector<std::string> strings;
     std::istringstream f(config);
     std::string s;
@@ -140,6 +141,7 @@ bool SerialPort::Initialize(const std::string& port, const std::string& config)
         else if (speedStr == "3000000") speed = B3000000;
         else if (speedStr == "3500000") speed = B3500000;
         else if (speedStr == "4000000") speed = B4000000;
+        Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Speed: " + speedStr);
     }
 
     Initialize(port, speed);

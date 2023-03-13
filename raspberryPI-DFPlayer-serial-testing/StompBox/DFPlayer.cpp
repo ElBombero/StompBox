@@ -48,8 +48,9 @@ void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, b
     std::vector<uint8_t> commandData;
 
     commandData.push_back(static_cast<uint8_t>(ESpecialTokens::Token_Start));   // $S 
-    commandData.push_back(static_cast<uint8_t>(command));                       // command ID
+    commandData.push_back(static_cast<uint8_t>(ESpecialTokens::Token_Version)); // DF Player version
     commandData.push_back(0x06);                                                // instruction length (excluding bytes $S and $O)
+    commandData.push_back(static_cast<uint8_t>(command));                       // command ID
     switch (command)
     {
     case ECommand::Command_Track_Set:
