@@ -93,7 +93,7 @@ public:
 
     static DFPlayer& Instance();
     ~DFPlayer();
-    void InitializeSerialPort(std::string port, std::string config);
+    void InitializeSerialPort(const std::string& port, const std::string& config = "9600;");
 
     static void SendCommand(ECommand command, uint16_t paramWL = 0, uint8_t paramH = 0, bool feedback = false);
     void ReadResponse();
@@ -104,6 +104,6 @@ private:
     DFPlayer();
 
     static void CalculateCommandChecksum(std::vector<uint8_t>& commandData);
-
     std::unique_ptr<SerialPort> m_serialPort;
+    const char c_configStringSeparator = ';';
 };

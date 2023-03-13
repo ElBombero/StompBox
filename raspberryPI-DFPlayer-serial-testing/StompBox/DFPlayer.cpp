@@ -9,10 +9,53 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-//#include <stdio.h>
-//#include <fcntl.h>
-//#include <unistd.h>
+#include <sstream>
 
+
+
+DFPlayer::DFPlayer() :
+    m_serialPort(new SerialPort())
+{
+    std::string logSource = "DFPlayer::DFPlayer";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "created");
+}
+
+DFPlayer::~DFPlayer()
+{
+    std::string logSource = "DFPlayer::~DFPlayer";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Destructing DFPlayer");
+    m_serialPort->Close();
+    m_serialPort = nullptr;
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "DFPlayer destructed");
+}
+
+DFPlayer& DFPlayer::Instance()
+{
+    static std::string s_initialization;
+    static DFPlayer s_instance;
+    return s_instance;
+}
+
+void DFPlayer::InitializeSerialPort(const std::string& port, const std::string& config)
+{
+    std::vector<std::string> strings;
+    std::istringstream f(config);
+    std::string s;
+    while (getline(f, s, c_configStringSeparator)) {
+        //cout << s << endl;
+        strings.push_back(s);
+    }
+    speed_t speed = B9600;
+    if (strings.size >= 1)
+    {
+        std::string
+        switch (strings[0])
+        {
+        case "9600":
+        }
+    }
+    m_serialPort->Initialize(port, B9600);
+}
 
 void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, bool feedback)
 {
@@ -49,50 +92,12 @@ void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, b
     CalculateCommandChecksum(commandData);
     commandData.push_back(static_cast<uint8_t>(ESpecialTokens::Token_End));   // $O
 
-
     std::string message = "";
     HexDump(commandData, message);
-
     Logger::Log(Logger::ELogLevel::Log_Debug, logSource, message);
 
     Instance().m_serialPort->WriteMessage(commandData);
 }
-
-void DFPlayer::HexDump(const char* buffer, size_t bufferSize, std::string& output)
-{
-    output = "";
-    char buff[16];
-    for (size_t i = 0; i < bufferSize; ++i)
-    {
-        //sprintf(buff, "\\x%02x", buffer[i]);
-        sprintf(buff, "%02x ", buffer[i]);
-        output += buff;
-    }
-
-    //Logger::Log(Logger::ELogLevel::Log_Debug, "HexTump", output);
-}
-
-void DFPlayer::HexDump(const std::vector<uint8_t>&buffer, std::string& output)
-{
-    output = "";
-    char buff[16];
-    for (auto byte : buffer)
-    {
-        //sprintf(buffer, "\\x%02x", byte);
-        sprintf(buff, "%02x ", byte);
-        output += buff;
-    }
-
-    //Logger::Log(Logger::ELogLevel::Log_Debug, "HexTump", output);
-}
-
-DFPlayer& DFPlayer::Instance()
-{
-    static std::string s_initialization;
-    static DFPlayer s_instance;
-    return s_instance;
-}
-
 
 void DFPlayer::CalculateCommandChecksum(std::vector<uint8_t>& commandData)
 {
@@ -119,24 +124,26 @@ void DFPlayer::ReadResponse()
     Logger::Log(Logger::ELogLevel::Log_Debug, "DFPlayer::ReadResponse", output);
 }
 
-
-DFPlayer::DFPlayer() :
-    m_serialPort(new SerialPort())
+void DFPlayer::HexDump(const char* buffer, size_t bufferSize, std::string& output)
 {
-    std::string logSource = "DFPlayer::DFPlayer";
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "created");
+    output = "";
+    static char buff[16];
+    for (size_t i = 0; i < bufferSize; ++i)
+    {
+        //sprintf(buff, "\\x%02x", buffer[i]);
+        sprintf(buff, "%02x ", buffer[i]);
+        output += buff;
+    }
 }
 
-void DFPlayer::InitializeSerialPort(std::string port, std::string config)
+void DFPlayer::HexDump(const std::vector<uint8_t>&buffer, std::string& output)
 {
-    m_serialPort->Initialize(port, config);
-}
-
-DFPlayer::~DFPlayer()
-{
-    std::string logSource = "DFPlayer::~DFPlayer";
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Destructing DFPlayer");
-    m_serialPort->Close();
-    m_serialPort = nullptr;
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "DFPlayer destructed");
+    output = "";
+    static char buff[16];
+    for (auto byte : buffer)
+    {
+        //sprintf(buffer, "\\x%02x", byte);
+        sprintf(buff, "%02x ", byte);
+        output += buff;
+    }
 }

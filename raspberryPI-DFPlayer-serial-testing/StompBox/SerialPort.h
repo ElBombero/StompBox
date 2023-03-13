@@ -1,4 +1,5 @@
 #pragma once
+#define _POSIX_SOURCE
 
 #include <string>
 #include <vector>
@@ -13,7 +14,7 @@ class SerialPort
 {
 public:
     // ToDo: configure port from config parameter
-    bool Initialize(const std::string& port, const std::string& config);
+    bool Initialize(const std::string& port, const speed_t speed);
     void Close();
     bool WriteMessage(const std::vector<uint8_t>& message) const;
     // ToDo: implement (buffer the data!)
@@ -26,7 +27,7 @@ protected:
     //FILE* m_file;
     int m_fd;
     std::string m_port;
-    std::string m_portConfig;
+    speed_t m_speed;
     struct termios m_tty;
     std::queue<uint8_t> m_readBytes;
 };
