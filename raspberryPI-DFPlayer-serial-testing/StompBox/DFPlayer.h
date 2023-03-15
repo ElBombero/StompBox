@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <queue>
 #include <string>
 #include <memory>
 #include "SerialPort.h"
@@ -106,5 +107,4 @@ private:
 
     static void CalculateCommandChecksum(std::vector<uint8_t>& commandData);
     std::unique_ptr<SerialPort> m_serialPort;
-    //static const uint8_t c_versionDF = 0xff;
 };

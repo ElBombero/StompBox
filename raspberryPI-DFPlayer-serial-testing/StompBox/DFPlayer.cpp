@@ -42,7 +42,7 @@ void DFPlayer::InitializeSerialPort(const std::string& port, const std::string& 
 void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, bool feedback)
 {
     std::string logSource = "DFPlayer::SendCommand";
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Building command message...");
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Building command message...");
 
     uint8_t paramL = 0;
     std::vector<uint8_t> commandData;
@@ -77,9 +77,9 @@ void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, b
 
     std::string message = "";
     HexDump(commandData, message);
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, message);
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...sending command: " + message);
 
-    Instance().m_serialPort->WriteMessage(commandData);
+    Instance().m_serialPort->WriteBytes(commandData);
 }
 
 void DFPlayer::CalculateCommandChecksum(std::vector<uint8_t>& commandData)
@@ -92,19 +92,26 @@ void DFPlayer::CalculateCommandChecksum(std::vector<uint8_t>& commandData)
             sum += *it;
         }
     }
+    //sum *= 0xffff;
     sum *= -1;
     commandData.push_back(static_cast<uint8_t>(sum >> 8));                      // Checksum higher 8 bits
     commandData.push_back(static_cast<uint8_t>(sum & 0x00ff));                  // Checksum lower 8 bits
 }
 
+// ToDo: split messages by special tokens and data lengths
 void DFPlayer::ReadResponse()
 {
+    std::string logSource = "DFPlayer::ReadResponse";
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Reading message...");
     std::vector<uint8_t> response;
-    m_serialPort->ReadResponse(response);
+    m_serialPort->ReadBytes(response);
 
-    std::string output = "";
-    HexDump(response, output);
-    Logger::Log(Logger::ELogLevel::Log_Debug, "DFPlayer::ReadResponse", output);
+    std::string outputHex = "";
+    HexDump(response, outputHex);
+    if (!outputHex.empty())
+    {
+        Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...received response: " + outputHex);
+    }
 }
 
 void DFPlayer::HexDump(const char* buffer, size_t bufferSize, std::string& output)

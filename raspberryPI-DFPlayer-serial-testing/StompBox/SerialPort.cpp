@@ -7,38 +7,10 @@
 #include <sstream>
 
 
-// ToDo: implement (buffer the data!)
-bool SerialPort::ReadResponse(std::vector<uint8_t>& response)
-{
-    std::string logSource = "SerialPort::ReadResponse";
-    const size_t bufferSize = 32;
-    static uint8_t readBuff[bufferSize];
-    if (m_fd < 0)
-    {
-        Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port not opened");
-        return false;
-    }
-    while(true)
-    {
-        size_t readBytes = read(m_fd, readBuff, bufferSize);
-        for (size_t i = 0; i < readBytes; ++i)
-        {
-            m_readBytes.push(readBuff[i]);
-            response.push_back(readBuff[i]);
-        }
-        if (readBytes < bufferSize)
-        {
-            break;
-        }
-    }
-
-    return true;
-}
-
 // ToDo: configure port from config parameter
 bool SerialPort::Initialize(const std::string& port, const speed_t speed)
 {
-    std::string logSource = "SerialPort::Initialize";
+    static const std::string logSource = "SerialPort::Initialize";
     if ((!m_port.empty() && (m_port.compare(port) != 0)) ||
         (speed != m_speed))
     {
@@ -52,7 +24,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         m_port = port;
         m_speed = speed;
         m_fd = open(m_port.c_str(), c_defaultOpenFlags);
-        //m_fd = open("/dev/ttyAMA0", O_RDWR);
+        
         if (m_fd < 0)
         {
             Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port could not be opened");
@@ -99,7 +71,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
 
 bool SerialPort::Initialize(const std::string& port, const std::string& config)
 {
-    std::string logSource = "SerialPort::Initialize(2)";
+    static const std::string logSource = "SerialPort::Initialize(2)";
     std::vector<std::string> strings;
     std::istringstream f(config);
     std::string s;
@@ -147,10 +119,75 @@ bool SerialPort::Initialize(const std::string& port, const std::string& config)
     Initialize(port, speed);
 }
 
-bool SerialPort::WriteMessage(const std::vector<uint8_t>& messageData) const
+// ToDo: separate thread for queued bytes reading
+// ToDo: register callback to notify consumer there are was new data read
+bool SerialPort::ReadBytes(std::vector<uint8_t>& response)
 {
-    std::string logSource = "SerialPort::WriteMessage";
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Writing message...");
+    static const std::string logSource = "SerialPort::ReadBytes";
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "begin...");
+    response.clear();
+    if (m_fd < 0)
+    {
+        Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port not opened");
+        return false;
+    }
+    {
+        std::lock_guard<std::mutex> lockPort(m_readPortAccess);
+        while (true)
+        {
+            //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...reading bytes from port...");
+            const size_t bufferSize = 32;
+            static uint8_t readBuff[bufferSize];
+            int readBytes = read(m_fd, readBuff, bufferSize);
+            if (readBytes < 0)
+            {
+                //Logger::Log(Logger::ELogLevel::Log_Error, logSource, "...port reading error");
+                //std::cout << ":";
+                return false;
+            }
+            else if (readBytes == 0)
+            {
+                //std::cout << ".";
+                return false;
+            }
+            else if (readBytes > 0)
+            {
+                for (size_t i = 0; i < readBytes; ++i)
+                {
+                    //std::cout << std::hex << readBuff[i] << std::dec << " ";
+                    std::lock_guard<std::mutex> lockQueue(m_readQueueAccess);
+                    m_readQueue.push(readBuff[i]);
+                }
+                //std::cout << std::endl;
+            }
+            if (readBytes < bufferSize)
+            {
+                break;
+            }
+        }
+    }
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...reading queued bytes...");
+    
+    {
+        std::lock_guard<std::mutex> lockQueue(m_readQueueAccess);
+        while (!m_readQueue.empty())
+        {
+            auto byte = m_readQueue.front();
+            m_readQueue.pop();
+            response.push_back(byte);
+        }
+    }
+
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...end");
+    return true;
+}
+
+// ToDo: separate thread for queued bytes writing
+// ToDo: use m_writeQueue and m_writeQueueAccess mutex
+bool SerialPort::WriteBytes(const std::vector<uint8_t>& messageData)
+{
+    static const std::string logSource = "SerialPort::WriteBytes";
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Writing message...");
 
     if (m_fd < 0)
     {
@@ -164,24 +201,20 @@ bool SerialPort::WriteMessage(const std::vector<uint8_t>& messageData) const
     }
     size_t dataSize = messageData.size();
     std::vector<uint8_t>::const_iterator it = messageData.begin();
+    size_t bytesWritten = 0;
     const uint8_t* buffer = static_cast<const uint8_t*>(&(*it));
-    if (write(m_fd, static_cast<const void*>(buffer), dataSize) != dataSize)
+    {
+        std::lock_guard<std::mutex> lockPort(m_writePortAccess);
+        //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...writing...");
+        bytesWritten = write(m_fd, static_cast<const void*>(buffer), dataSize);
+    }
+    if (bytesWritten != dataSize)
     {
         Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Writing to port failed");
         return false;
     }
 
-    /*if (flush(m_fd) != 0)
-    {
-        Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Flush failed");
-        return false;
-    }*/
-    /*if (std::ferror(m_file))
-    {
-        Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port error");
-        return false;
-    }*/
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Message written OK");
+    //Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Message written OK");
     return true;
 }
 
@@ -189,21 +222,21 @@ SerialPort::SerialPort() :
     m_fd(-1),
     m_port("")
 {
-    std::string logSource = "SerialPort::SerialPort";
+    static const std::string logSource = "SerialPort::SerialPort";
     Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "created");
 }
 
 SerialPort::~SerialPort()
 {
-    std::string logSource = "SerialPort::~SerialPort";
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Destructing SerialPort");
+    static const std::string logSource = "SerialPort::~SerialPort";
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Destructing SerialPort...");
     Close();
-    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "SerialPort destructed");
+    Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "...SerialPort destructed");
 }
 
 void SerialPort::Close()
 {
-    std::string logSource = "SerialPort::ClosePort";
+    static const std::string logSource = "SerialPort::ClosePort";
     if (m_fd >= 0)
     {
         Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Closing port");
