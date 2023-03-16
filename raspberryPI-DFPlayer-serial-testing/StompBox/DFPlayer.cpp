@@ -66,7 +66,9 @@ void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, b
     case ECommand::Command_Volume_Adjust_set:
     case ECommand::Command_Repeat:
     case ECommand::Query_Error_Retransmit:
+    case ECommand::Query_Init_Params:
         paramL = static_cast<uint8_t>(paramWL & 0x00ff);
+        break;
     }
     commandData.push_back(feedback ? 0x01 : 0x00);
     commandData.push_back(paramH);
