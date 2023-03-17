@@ -34,9 +34,9 @@ DFPlayer& DFPlayer::Instance()
     return s_instance;
 }
 
-void DFPlayer::InitializeSerialPort(const std::string& port, const std::string& config)
+int DFPlayer::InitializeSerialPort(const std::string& port, const std::string& config)
 {
-    m_serialPort->Initialize(port, config);
+    return m_serialPort->Initialize(port, config);
 }
 
 void DFPlayer::SendCommand(ECommand command, uint16_t paramWL, uint8_t paramH, bool feedback)

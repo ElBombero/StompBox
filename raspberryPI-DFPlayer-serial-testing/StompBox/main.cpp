@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     cinfd[0].fd = fileno(stdin);
     cinfd[0].events = POLLIN;
     // cinfd[1] : serial port:
-    cinfd[1].fd = DFPlayer::Instance().InitializeSerialPort(argv[1], argv[2]);;
+    cinfd[1].fd = DFPlayer::Instance().InitializeSerialPort(argv[1], argv[2]);
     cinfd[1].events = POLLIN;
     PrintMenu();
 
@@ -89,6 +89,7 @@ int main(int argc, char** argv)
         while (!poll(cinfd, 2, 100));
         if (cinfd[1].revents & POLLIN)
         {
+            usleep(200000);
             DFPlayer::Instance().ReadResponse();
             continue;
         }
