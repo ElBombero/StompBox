@@ -12,8 +12,8 @@
 class SerialPort
 {
 public:
-    bool Initialize(const std::string& port, const speed_t speed);
-    bool Initialize(const std::string& port, const std::string& config);
+    int Initialize(const std::string& port, const speed_t speed);
+    int Initialize(const std::string& port, const std::string& config);
     void Close();
     bool WriteBytes(const std::vector<uint8_t>& message);
     bool ReadBytes(std::vector<uint8_t>& response);

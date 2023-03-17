@@ -66,24 +66,36 @@ bool IsStringInList(const std::string& str, const std::vector<std::string>& list
 
 int main(int argc, char** argv)
 {
+    printf("hello from %s!\n", "StompBox");
 
-    pollfd cinfd[1];
+    pollfd cinfd[2];
     // Theoretically this should always be 0, but one fileno call isn't going to hurt, and if
     // we try to run somewhere that stdin isn't fd 0 then it will still just work
-
-    printf("hello from %s!\n", "StompBox");
-    DFPlayer::Instance().InitializeSerialPort(argv[1], argv[2]);
-    PrintMenu();
 
     //DFPlayer::Instance().SendCommand(DFPlayer::ECommand::Query_Init_Params, 0x08, 0, true);
     //usleep(200000);
     //DFPlayer::Instance().ReadResponse();
    
+    // cinfd[0] : standard input:
     cinfd[0].fd = fileno(stdin);
     cinfd[0].events = POLLIN;
+    // cinfd[1] : serial port:
+    cinfd[1].fd = DFPlayer::Instance().InitializeSerialPort(argv[1], argv[2]);;
+    cinfd[1].events = POLLIN;
+    PrintMenu();
+
     while (true)
     {
-        while (!poll(cinfd, 1, 200));
+        while (!poll(cinfd, 2, 100));
+        if (cinfd[1].revents & POLLIN)
+        {
+            DFPlayer::Instance().ReadResponse();
+            continue;
+        }
+        if (!cinfd[0].revents & POLLIN)
+        {
+            continue;
+        }
 
         std::string input;
         std::cin >> input;
@@ -291,8 +303,8 @@ int main(int argc, char** argv)
             std::cout << "Invalid command: \'" << command << "\'" << std::endl;
         }
 
-        usleep(200000);
-        DFPlayer::Instance().ReadResponse();
+        //usleep(200000);
+        //DFPlayer::Instance().ReadResponse();
     }
 
     usleep(200000);

@@ -8,7 +8,7 @@
 
 
 // ToDo: configure port from config parameter
-bool SerialPort::Initialize(const std::string& port, const speed_t speed)
+int SerialPort::Initialize(const std::string& port, const speed_t speed)
 {
     static const std::string logSource = "SerialPort::Initialize";
     if ((!m_port.empty() && (m_port.compare(port) != 0)) ||
@@ -29,7 +29,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         {
             Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port could not be opened");
             printf("Error %i from open: %s\n", errno, strerror(errno));
-            return false;
+            return -1;
         }
         memset(&m_tty, 0, sizeof m_tty);
         Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Port opened OK");
@@ -37,7 +37,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         {
             printf("Error %i from open: %s\n", errno, strerror(errno));
             Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port configuration could not be read");
-            return false;
+            return -1;
         }
         cfsetospeed(&m_tty, speed);
         cfsetispeed(&m_tty, speed);
@@ -58,7 +58,7 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         if (tcsetattr(m_fd, TCSANOW, &m_tty) != 0)
         {
             Logger::Log(Logger::ELogLevel::Log_Error, logSource, "Port could not be configured");
-            return false;
+            return -1;
         }
         else
         {
@@ -66,10 +66,10 @@ bool SerialPort::Initialize(const std::string& port, const speed_t speed)
         }
     }
     Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Port initialized OK");
-    return true;
+    return m_fd;
 }
 
-bool SerialPort::Initialize(const std::string& port, const std::string& config)
+int SerialPort::Initialize(const std::string& port, const std::string& config)
 {
     static const std::string logSource = "SerialPort::Initialize(2)";
     std::vector<std::string> strings;
@@ -116,7 +116,7 @@ bool SerialPort::Initialize(const std::string& port, const std::string& config)
         Logger::Log(Logger::ELogLevel::Log_Debug, logSource, "Speed: " + speedStr);
     }
 
-    Initialize(port, speed);
+    return Initialize(port, speed);
 }
 
 // ToDo: separate thread for queued bytes reading
