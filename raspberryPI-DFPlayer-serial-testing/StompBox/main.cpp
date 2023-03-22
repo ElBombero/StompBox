@@ -31,10 +31,10 @@ void PrintMenu()
     printf("13|x0d\tPlayback\n");
     printf("14|x0e\tPause\n");
     printf("15|x0f\tSet Folder [ 0 - 10 ]\n");
-    printf("16|x10\tAdjust Volume [1: Open volume adjust] [volume gain (0 - 31)\n");
+    printf("16|x10\tAdjust Volume [ 1: Open volume adjust] [volume gain (0 - 31) ]\n");
     printf("17|x11\tRepeat Play [ 0: Stop Play | 1: Start Repeat Play ]\n");
     printf("\n");
-    printf("63|x3f\tSend Initialization Params [0 - 0x0f (each bit represent one device)]\n");
+    printf("63|x3f\tSend Initialization Params [ 0 - 0x0f (each bit represent one device) ]\n");
     printf("64|x40\tError, request retransmittion\n");
     printf("65|x41\tReply\n");
     printf("66|x42\tQuery Current Status\n");
@@ -49,7 +49,6 @@ void PrintMenu()
     printf("75|x4b\tQuery TF card Current Track\n");
     printf("76|x4c\tQuery U-disk Current Track\n");
     printf("77|x4d\tQuery Flash Current Track\n");
-
 }
 
 bool IsStringInList(const std::string& str, const std::vector<std::string>& list)
@@ -294,10 +293,12 @@ int main(int argc, char** argv)
 
         if (commandInt > 0)
         {
+            std::cout << "command: " << command << std::endl;
             DFPlayer::Instance().SendCommand(static_cast<DFPlayer::ECommand>(commandInt),
                 static_cast<uint16_t>(numParam1),
                 static_cast<uint8_t>(numParam2),
-                true);
+                false);
+                //true);
         }
         else
         {
