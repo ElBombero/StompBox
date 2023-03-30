@@ -2,12 +2,21 @@
 
 
 #include <HardwareSerial.h>
+#include <MIDIUSB.h>
 #include "utils.h"
 
 
 class Midi
 {
 public:
+  enum MidiConnection {
+    Midi_Serial_9600    = 0,
+    Midi_Serial_31250   = 1,
+    Midi_USB            = 2,
+    Midi_Bluetooth      = 3,
+    Midi_Default        = Midi_Serial_31250
+  };
+
   enum MidiCommand {
     Command_UNDEFINED           = 0x00,
     Command_NoteOff             = 0x80,
