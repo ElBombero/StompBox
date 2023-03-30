@@ -82,7 +82,7 @@ I2cDisplay* g_lcd = nullptr;
 void setup() {
   pinMode(config.c_volumePin, INPUT); //INPUT_PULLUP);
   //Wire.begin();
-  g_midi = new Midi(&Serial, config.c_midiBaudRate, config.c_skipSameMidiCommands);
+  g_midi = new Midi(config.c_midiConnectionMode, config.c_skipSameMidiCommands, config.c_skipSameMidiCommandsPeriod, &Serial);
   g_lcd = new I2cDisplay(config.c_i2cDisplayAddress, config.c_i2cDisplayRows, config.c_i2cDisplayCols);
   
   g_lcd->SetSection(DisplaySection::Section_Instrument1Mode, 0, 0, 1);

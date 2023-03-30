@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "midi.h"
+
 /*
 ToDo:
 o fix display - remains of previous longer text in sections
@@ -39,7 +41,8 @@ struct Config {
   const unsigned long c_skipSameMidiCommandsPeriod = 1000;
   const uint8_t c_percussionChannel = 10;
   const uint8_t c_channelsCount = 2;
-  const unsigned int c_midiBaudRate = 31250;
+  const Midi::MidiConnectionMode c_midiConnectionMode = Midi::MidiConnectionMode::Midi_Serial_31250;
+  //const unsigned int c_midiBaudRate = 31250;
   //const unsigned int c_midiBaudRate = 9600;
   const uint8_t c_i2cDisplayAddress = 0x27;
   const uint8_t c_i2cDisplayRows = 2;

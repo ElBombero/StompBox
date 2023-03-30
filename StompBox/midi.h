@@ -1,8 +1,10 @@
+#ifndef MIDI_H
+#define MIDI_H
+
+
 #include <Arduino_BuiltIn.h>
-
-
 #include <HardwareSerial.h>
-#include <MIDIUSB.h>
+//#include <MIDIUSB.h>
 #include "utils.h"
 
 
@@ -127,12 +129,12 @@ public:
     }
   }
 
-  Midi(MidiConnectionMode connectionMode = MidiConnectionMode::Midi_Default) {
+  /*Midi(MidiConnectionMode connectionMode = MidiConnectionMode::Midi_Default) {
     switch(connectionMode) {
       case case MidiConnectionMode::Midi_USB:
         m_usb = new MidiUSB();
     }
-  }
+  }*/
 
   ~Midi() {
     m_pSerial->end();
@@ -147,7 +149,9 @@ public:
 private:
   //Circularuint8_tBuffer* m_pBuffer;
   HardwareSerial* m_pSerial = nullptr;
-  MidiUSB* m_usb = nullptr;
+  //MidiUSB* m_usb = nullptr;
   bool m_skipSameCommands;
   unsigned long m_skipSameMidiCommandsPeriod;
 };
+
+#endif // defined MIDI_H
