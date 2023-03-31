@@ -4,8 +4,10 @@
 
 #include <Arduino_BuiltIn.h>
 #include <HardwareSerial.h>
-//#include <MIDIUSB.h>
 #include "utils.h"
+#ifdef MIDIUSB_SUPPORTED
+#include <MIDIUSB.h>
+#endif // defined MIDIUSB_SUPPORTED
 
 
 class Midi
@@ -88,6 +90,7 @@ public:
     Change_Next
   };
 
+#ifdef MIDIUSB_SUPPORTED
   enum USB_CableId {
     CId_Misc                  = 0x00, // Miscellaneous function codes. Reserved for future extensions
     CId_Reserved              = 0x01, // Cable events. Reserved for future expansion.
@@ -107,6 +110,7 @@ public:
     CId_PitchBendChange       = 0x0e, // PitchBend Change
     CId_1B                    = 0x0f  // Single Byte
   };
+  #endif // defined MIDIUSB_SUPPORTED
 
   static const uint8_t c_VelocityMin = 0x00;
   static const uint8_t c_VelocityMax = 0x7f;
@@ -128,14 +132,14 @@ public:
         m_pSerial->begin(31250); break;
     }
   }
-
-  /*Midi(MidiConnectionMode connectionMode = MidiConnectionMode::Midi_Default) {
+#ifdef MIDIUSB_SUPPORTED
+  Midi(MidiConnectionMode connectionMode = MidiConnectionMode::Midi_Default) {
     switch(connectionMode) {
       case case MidiConnectionMode::Midi_USB:
         m_usb = new MidiUSB();
     }
-  }*/
-
+  }
+#endif // defined MIDIUSB_SUPPORTED
   ~Midi() {
     m_pSerial->end();
     //delete m_pBuffer;
@@ -149,7 +153,9 @@ public:
 private:
   //Circularuint8_tBuffer* m_pBuffer;
   HardwareSerial* m_pSerial = nullptr;
-  //MidiUSB* m_usb = nullptr;
+#ifdef MIDIUSB_SUPPORTED
+  MidiUSB* m_usb = nullptr;
+#endif // defined MIDIUSB_SUPPORTED
   bool m_skipSameCommands;
   unsigned long m_skipSameMidiCommandsPeriod;
 };
