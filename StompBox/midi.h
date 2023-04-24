@@ -1,6 +1,7 @@
 #ifndef MIDI_H
 #define MIDI_H
 
+//#define MIDIUSB_SUPPORTED
 
 #include <Arduino_BuiltIn.h>
 #include <HardwareSerial.h>

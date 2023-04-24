@@ -19,7 +19,7 @@ o disable/solve long pushing both buttons / other than in change-instrument mode
 - clean code, refactor
 
 Known issues:
-- unwanted immediate instrument change on mode switch to instrument-change mode
+- unwanted immediate instrument change on mode switch from play to instrument-change mode
 */
 
 enum DisplayBacklightMode {
