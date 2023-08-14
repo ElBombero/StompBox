@@ -27,13 +27,13 @@ void I2cDisplay::SetSection(const uint8_t sectionId, const uint8_t row, const ui
   }  
   m_sections[sectionId].row = row;
   m_sections[sectionId].col = col;
-  m_sections[sectionId].width = Min(width, (m_displayCols - col));
+  m_sections[sectionId].width = Min<const uint8_t>(width, (m_displayCols - col));
 }
 
 void I2cDisplay::ClearSection(const uint8_t sectionId)
 {
   char buffer[] = "                                "; // 32 x ' '
-  size_t len = Min(strlen(buffer) - 1, m_sections[sectionId].width);
+  size_t len = Min<uint8_t>(strlen(buffer) - 1, m_sections[sectionId].width);
   buffer[len] = '\0';
   Write(m_sections[sectionId].row, m_sections[sectionId].col, buffer);
 }
@@ -44,7 +44,7 @@ void I2cDisplay::WriteSection(const uint8_t sectionId, const char* buff) //, boo
     return;
   }
   char buffer[] = "                                "; // 32 x ' '
-  size_t len = Min(strlen(buffer) -1, Min(strlen(buff), m_sections[sectionId].width));
+  size_t len = Min<size_t>(strlen(buffer) -1, Min<size_t>(strlen(buff), m_sections[sectionId].width));
 //  size_t len = Min(strlen(buffer) - 1, m_sections[sectionId].width);
   //buffer[len] = '\0';
   buffer[m_sections[sectionId].width] = '\0';

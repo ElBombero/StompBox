@@ -1,6 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+//#define USE_ROTARY_SWITCH
+//#define MIDIUSB_SUPPORTED
+
 #include "midi.h"
 
 /*
@@ -41,13 +44,19 @@ struct Config {
   const unsigned long c_skipSameMidiCommandsPeriod = 1000;
   const uint8_t c_percussionChannel = 10;
   const uint8_t c_channelsCount = 2;
-  const Midi::MidiConnectionMode c_midiConnectionMode = Midi::MidiConnectionMode::Midi_Serial_31250;
+//  const Midi::MidiConnectionMode c_midiConnectionMode = Midi::MidiConnectionMode::Midi_Serial_31250;
+  const Midi::MidiConnectionMode c_midiConnectionMode = Midi::MidiConnectionMode::Midi_Serial_9600;
   //const unsigned int c_midiBaudRate = 31250;
   //const unsigned int c_midiBaudRate = 9600;
   const uint8_t c_i2cDisplayAddress = 0x27;
   const uint8_t c_i2cDisplayRows = 2;
   const uint8_t c_i2cDisplayCols = 16;
   const uint8_t c_volumePin = A0;
+#ifdef USE_ROTARY_SWITCH
+  const uint8_t c_rotarySwitchPin_clk = 8;
+  const uint8_t c_rotarySwtichPin_dta = 7;
+  const uint8_t c_rotarySwtichPin_btn = 4;
+#endif // USE_ROTARY_SWITCH
   //const int  c_minMeasVolume = 0x78;
   //const int  c_maxMeasVolume = 0x348;
 };

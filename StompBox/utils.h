@@ -2,16 +2,17 @@
 #define UTILS_H
 
 
-static int Min(int s1, int s2) {
-  return (s1 < s2) ? s1 : s2;
+template<class T>
+static T Min(T t1, T t2)
+{
+  return (t1 < t2) ? t1 : t2;
 }
 
-static int Max(int s1, int s2) {
-  return (s1 > s2) ? s1 : s2;
+template<class T>
+static T Max(T t1, T t2)
+{
+  return (t1 > t2) ? t1 : t2;
 }
 
-/*static uint8_t Min(uint8_t s1, uint8_t s2) {
-  return (s1 < s2) ? s1 : s2;
-}*/
 
 #endif // defined UTILS_H

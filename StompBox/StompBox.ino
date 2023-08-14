@@ -3,6 +3,9 @@
 #include "utils.h"
 #include "display.h"
 #include "config.h"
+#ifdef USE_ROTARY_SWITCH
+#include "rotarySwitch.h"
+#endif // USE_ROTARY_SWITCH
 
 enum DisplaySection {
   Section_Instrument1Mode = 0,
@@ -76,14 +79,21 @@ TapInput g_tapInput[] = {
   TapInput(3, &ISR_2, Midi::PercussionKey::Claves, Section_Instrument2Mode,
     Section_Instrument2Name, Midi::PercussionChange::Change_Next)
 };
+
 Midi* g_midi = nullptr;
 I2cDisplay* g_lcd = nullptr;
+#ifdef USE_ROTARY_SWITCH
+RotarySwitch* g_rotarySwitch = nullptr;
+#endif // USE_ROTARY_SWITCH
 
 void setup() {
   pinMode(config.c_volumePin, INPUT); //INPUT_PULLUP);
   //Wire.begin();
   g_midi = new Midi(config.c_midiConnectionMode, config.c_skipSameMidiCommands, config.c_skipSameMidiCommandsPeriod, &Serial);
   g_lcd = new I2cDisplay(config.c_i2cDisplayAddress, config.c_i2cDisplayRows, config.c_i2cDisplayCols);
+#ifdef USE_ROTARY_SWITCH
+  g_rotarySwitch = new RotarySwitch(config.c_rotarySwitchPin_clk, config.c_rotarySwtichPin_dta, config.c_rotarySwtichPin_btn);
+#endif // USE_ROTARY_SWITCH
   
   g_lcd->SetSection(DisplaySection::Section_Instrument1Mode, 0, 0, 1);
   g_lcd->SetSection(DisplaySection::Section_Instrument1Name, 0, 1, 15);
@@ -228,12 +238,16 @@ void loop() {
   delay(25); // TODO: replace hardcoded value by configured constant
 
   if(!(counter % 2)) { // TODO: replace hardcoded value by configured constant
+#ifdef USE_ROTARY_SWITCH
+    g_volume = g_rotarySwitch->GetValues();
+#else
     int volume = analogRead(config.c_volumePin);
     g_volume = (volume >> 3);
     /*static const float fDiff = (config.c_maxMeasVolume - config.c_minMeasVolume);
     float fVal = (float)Max(volume - config.c_minMeasVolume, 0);
     fVal = Min((size_t)(fVal * 1023.0f / fDiff), 1023);
     /g_volume = ((int)fVal >> 3);*/
+#endif // USE_ROTARY_SWITCH
     bool displayOff = true;
     for(uint8_t i = 0; i < config.c_channelsCount; ++i) {
       if(!g_tapInput[i].upCounter) {

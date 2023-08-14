@@ -1,12 +1,11 @@
 #ifndef MIDI_H
 #define MIDI_H
 
-//#define MIDIUSB_SUPPORTED
 
 #include <Arduino_BuiltIn.h>
 #include <HardwareSerial.h>
 #include "utils.h"
-#ifdef MIDIUSB_SUPPORTED
+#ifdef MIDIUSB_SUPPORTED // defined in config.h
 #include <MIDIUSB.h>
 #endif // defined MIDIUSB_SUPPORTED
 
@@ -17,8 +16,10 @@ public:
   enum MidiConnectionMode {
     Midi_Serial_9600    = 0,
     Midi_Serial_31250   = 1,
+#ifdef MIDIUSB_SUPPORTED
     Midi_USB            = 2,
     Midi_Bluetooth      = 3,
+#endif // defined MIDIUSB_SUPPORTED
     Midi_Default        = Midi_Serial_31250
   };
 
@@ -128,11 +129,12 @@ public:
   {
     switch(connectionMode) {
       case MidiConnectionMode::Midi_Serial_9600:
-        m_pSerial->begin(9600); break;
+        m_pSerial->begin(9600,SERIAL_8N1); break;
       case MidiConnectionMode::Midi_Serial_31250:
-        m_pSerial->begin(31250); break;
+        m_pSerial->begin(31250,SERIAL_8N1); break;
     }
   }
+
 #ifdef MIDIUSB_SUPPORTED
   Midi(MidiConnectionMode connectionMode = MidiConnectionMode::Midi_Default) {
     switch(connectionMode) {
