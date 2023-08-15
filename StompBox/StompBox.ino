@@ -87,6 +87,7 @@ RotarySwitch* g_rotarySwitch = nullptr;
 #endif // USE_ROTARY_SWITCH
 
 void setup() {
+  delay(100);
   pinMode(config.c_volumePin, INPUT); //INPUT_PULLUP);
   //Wire.begin();
   g_midi = new Midi(config.c_midiConnectionMode, config.c_skipSameMidiCommands, config.c_skipSameMidiCommandsPeriod, &Serial);
@@ -104,6 +105,7 @@ void setup() {
   g_selectInstrumentChannel = -1;
   SetDisplayBacklight(EventType::Event_ModeChanged);
   g_lcd->Backlight(true);
+  g_lcd->SetContrast(config.c_displayContrast);
   g_lcd->Write(0, 1, "Stompie v0.1.0");
   g_lcd->Write(1, 0, "(C) Florete, 2023");
   delay(2000);
@@ -247,6 +249,7 @@ void loop() {
     float fVal = (float)Max(volume - config.c_minMeasVolume, 0);
     fVal = Min((size_t)(fVal * 1023.0f / fDiff), 1023);
     /g_volume = ((int)fVal >> 3);*/
+    g_volume = 127; // TMP!!!
 #endif // USE_ROTARY_SWITCH
     bool displayOff = true;
     for(uint8_t i = 0; i < config.c_channelsCount; ++i) {

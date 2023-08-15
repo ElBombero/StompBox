@@ -60,3 +60,8 @@ void I2cDisplay::Backlight(const bool on)
 {
   on ? m_lcd.backlight() : m_lcd.noBacklight();
 }
+
+void I2cDisplay::SetContrast(const uint8_t contrast)
+{
+  m_lcd.setContrast(contrast);
+}

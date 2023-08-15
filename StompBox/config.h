@@ -52,6 +52,7 @@ struct Config {
   const uint8_t c_i2cDisplayRows = 2;
   const uint8_t c_i2cDisplayCols = 16;
   const uint8_t c_volumePin = A0;
+  const uint8_t c_displayContrast = 0xff;
 #ifdef USE_ROTARY_SWITCH
   const uint8_t c_rotarySwitchPin_clk = 8;
   const uint8_t c_rotarySwtichPin_dta = 7;
