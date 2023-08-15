@@ -13,7 +13,6 @@ public:
   void ClearSection(const uint8_t sectionId);
   void WriteSection(const uint8_t sectionId, const char* buff); //, bool clear = true);
   void Backlight(const bool on);
-  void SetContrast(const uint8_t contrast);
 
 
 private:

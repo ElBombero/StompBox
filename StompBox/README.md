@@ -1,2 +1,0 @@
-# StompBox
-StompBox
