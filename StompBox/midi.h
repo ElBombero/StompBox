@@ -28,14 +28,37 @@ public:
     Command_NoteOff             = 0x80,
     Command_NoteOn              = 0x90,
     Command_Aftertouch          = 0xa0,
-    Command_ContinousController = 0xb0,
-    Command_PatchChange         = 0xc0,
+    Command_ControlChange       = 0xb0,
+    Command_ContinousController = Command_ControlChange,
+    Command_ProgramChange       = 0xc0,
+    Command_PatchChange         = Command_ProgramChange,
     Command_ChannelPressure     = 0xd0,
     Command_PitchBend           = 0xe0,
-    Command_NonMusical          = 0xf0
+    Command_NonMusical          = 0xf0,
+    Command_Reset               = 0xff
   };
 
+  enum ControlChange_Controllers {
+    CCController_SoundBankSelMSB    = 0x00,
+    CCController_SoundBankSelLSB    = 0x20,
+    CCController_ModulationWheel    = 0x01,
+    CCController_InstrVolumeLevel   = 0x07,
+    CCController_Panoramic          = 0x0a, // 0 = left, 64 = center, 127 = right
+    CCController_Expression         = 0x0b,
+    CCController_SustainPedal       = 0x40, // 0 = no pedal, >= 64 = pedal ON
+    CCController_AllControllersOff  = 0x79, // (clears all the controller values for this channel, back to their default values)
+    CCController_AllNotessOff       = 0x7b, // (stops all the notes that are currently playing)
+};
+
   enum PercussionKey {
+    HighQ                 = 27,
+    Slap                  = 28,
+    ScratchPush           = 29,
+    ScratchPull           = 30,
+    Sticks                = 31,
+    SquareClick           = 32,
+    MetronomeClick        = 33,
+    MetronomeBell         = 34,
     AcousticBassDrum      = 35,
     BassDrum1             = 36,
     SideStick             = 37,
@@ -83,6 +106,14 @@ public:
     OpenCuica             = 79,
     MuteTriangle          = 80,
     OpenTriangle          = 81,
+    Shaker                = 82,
+    JingleBell            = 83,
+    BellTree              = 84,
+    Castanets             = 85,
+    MuteSurdo             = 86,
+    OpenSurdo             = 87,
+//    FIRST                 = HighQ,
+//    LAST                  = OpenSurdo,
     FIRST                 = AcousticBassDrum,
     LAST                  = OpenTriangle,
   };
@@ -125,7 +156,8 @@ public:
     HardwareSerial* pSerial = &Serial) :
   m_pSerial(pSerial),
   m_skipSameCommands(skipSameCommands),
-  m_skipSameMidiCommandsPeriod(skipSameMidiCommandsPeriod)
+  m_skipSameMidiCommandsPeriod(skipSameMidiCommandsPeriod),
+  debugBuffer(nullptr)
   {
     switch(connectionMode) {
       case MidiConnectionMode::Midi_Serial_9600:
@@ -148,9 +180,13 @@ public:
     //delete m_pBuffer;
   }
 
-  bool MidiMessage(MidiCommand command, uint8_t channel, uint8_t key, uint8_t velocity);
-  static void GetPercussionName(PercussionKey key, char* buffer, size_t bufferSize = 32);
+  bool MidiMessage(const MidiCommand command, const uint8_t channel, const uint8_t key, const uint8_t velocity);
+  static void GetPercussionName(PercussionKey key, char* buffer, size_t bufferSize = 32, bool shorten = false);
   static PercussionKey ChangePercussion(PercussionKey oldKey, PercussionChange operation);
+  void SetDebugBuffer(char* buffer)
+  {
+    debugBuffer = buffer;
+  }
 
 
 private:
@@ -161,6 +197,7 @@ private:
 #endif // defined MIDIUSB_SUPPORTED
   bool m_skipSameCommands;
   unsigned long m_skipSameMidiCommandsPeriod;
+  char* debugBuffer;
 };
 
 #endif // defined MIDI_H

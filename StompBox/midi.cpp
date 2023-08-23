@@ -1,38 +1,55 @@
 #include <Arduino.h>
 #include "midi.h"
 
-bool Midi::MidiMessage(MidiCommand command, uint8_t channel, uint8_t key, uint8_t velocity) {
+bool Midi::MidiMessage(const MidiCommand command, const uint8_t channel, const uint8_t key, const uint8_t velocity) {
   static MidiCommand lastCommand = MidiCommand::Command_UNDEFINED;
   static unsigned long lastCommandTime = 0;
   size_t written = 0;
   if(!m_pSerial->availableForWrite()) {
+    if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #0");
     return false;
   }
-  // Only write command if it differs from the last one written
+  // Only write command if it differs from the last one written or time elapsed
   unsigned long now = millis();
   if((lastCommand != command) ||
     !m_skipSameCommands ||
     ((now - lastCommandTime) >= m_skipSameMidiCommandsPeriod)) {
     written = m_pSerial->write(command | (0x0f & channel));
+    if(debugBuffer != nullptr) sprintf(debugBuffer, "%2x", (command | (0x0f & channel)));
     if(written != 1) {
+      if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #1");
       return false;
     }
     lastCommand = command;
     lastCommandTime = now;
   }
   
-  if(command != MidiCommand::Command_NonMusical) {
-    written = m_pSerial->write(0x7f & key);
-    if(written != 1) {
-      return false;
-    }
-    if(command != MidiCommand::Command_ChannelPressure) {
-      written = m_pSerial->write(0x7f & velocity);
-      if(written != 1) {
-        return false;
-      }
-    }
+  // 1st Data byte (if message has any)
+  switch(command) {
+    case MidiCommand::Command_NonMusical:
+    case MidiCommand::Command_Reset:
+      return true;
   }
+  written = m_pSerial->write(0x7f & key);
+  if(debugBuffer != nullptr) sprintf(&debugBuffer[2], " %2x", (0x7f & key));
+  if(written != 1) {
+    if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #2");
+    return false;
+  }
+  
+  // 2nd Data byte (if message has any)
+  switch(command) {
+    case MidiCommand::Command_ChannelPressure:
+    case MidiCommand::Command_PatchChange:
+      return true;
+  }
+  written = m_pSerial->write(0x7f & velocity);
+  if(debugBuffer != nullptr) sprintf(&debugBuffer[5], " %2x", (0x7f & velocity));
+  if(written != 1) {
+    if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #3");
+    return false;
+  }
+
   return true;
 }
 
@@ -53,11 +70,11 @@ Midi::PercussionKey Midi::ChangePercussion(Midi::PercussionKey oldKey, Midi::Per
   return (Midi::PercussionKey)newKey;
 }
 
-void Midi::GetPercussionName(Midi::PercussionKey key, char* bufferOut, size_t bufferSize) {
+void Midi::GetPercussionName(Midi::PercussionKey key, char* bufferOut, size_t bufferSize, bool shorten) {
   char buffer[32];
   switch(key) {
     case PercussionKey::AcousticBassDrum:
-      sprintf(buffer, "Acoustic Bass Drum"); break;
+      sprintf(buffer, "Acoust.Bass Drum"); break;
     case PercussionKey::BassDrum1:
       sprintf(buffer, "Bass Drum 1"); break;
     case PercussionKey::SideStick:
@@ -67,7 +84,7 @@ void Midi::GetPercussionName(Midi::PercussionKey key, char* bufferOut, size_t bu
     case PercussionKey::HandClap:
       sprintf(buffer, "Hand Clap"); break;
     case PercussionKey::ElectronicSnare:
-      sprintf(buffer, "Electronic Snare"); break;
+      sprintf(buffer, "Electron. Snare"); break;
     case PercussionKey::LowFloorTom:
       sprintf(buffer, "Low Floor Tom"); break;
     case PercussionKey::ClosedHiHat:

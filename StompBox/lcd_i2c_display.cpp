@@ -1,4 +1,4 @@
-#include "display.h"
+#include "lcd_i2c_display.h"
 
 I2cDisplay::I2cDisplay(const uint8_t address, const uint8_t rows, const uint8_t cols) :
   m_lcd(address, cols, rows),
