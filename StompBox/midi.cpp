@@ -4,6 +4,8 @@
 bool Midi::MidiMessage(const MidiCommand command, const uint8_t channel, const uint8_t key, const uint8_t velocity) {
   static MidiCommand lastCommand = MidiCommand::Command_UNDEFINED;
   static unsigned long lastCommandTime = 0;
+  static uint8_t outBuffer[16];
+  uint8_t messageSize = 0;
   size_t written = 0;
   if(!m_pSerial->availableForWrite()) {
     if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #0");
@@ -14,40 +16,40 @@ bool Midi::MidiMessage(const MidiCommand command, const uint8_t channel, const u
   if((lastCommand != command) ||
     !m_skipSameCommands ||
     ((now - lastCommandTime) >= m_skipSameMidiCommandsPeriod)) {
-    written = m_pSerial->write(command | (0x0f & channel));
-    if(debugBuffer != nullptr) sprintf(debugBuffer, "%2x", (command | (0x0f & channel)));
-    if(written != 1) {
-      if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #1");
-      return false;
-    }
-    lastCommand = command;
-    lastCommandTime = now;
+      outBuffer[messageSize++] = command | (0x0f & channel);
+      lastCommand = command;
+      lastCommandTime = now;
   }
   
   // 1st Data byte (if message has any)
   switch(command) {
     case MidiCommand::Command_NonMusical:
     case MidiCommand::Command_Reset:
-      return true;
+      break;
+    default:
+      outBuffer[messageSize++] = 0x7f & key;
   }
-  written = m_pSerial->write(0x7f & key);
-  if(debugBuffer != nullptr) sprintf(&debugBuffer[2], " %2x", (0x7f & key));
-  if(written != 1) {
-    if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #2");
-    return false;
-  }
-  
+
   // 2nd Data byte (if message has any)
   switch(command) {
     case MidiCommand::Command_ChannelPressure:
     case MidiCommand::Command_PatchChange:
-      return true;
+      break;
+    default:
+      outBuffer[messageSize++] = 0x7f & velocity;
   }
-  written = m_pSerial->write(0x7f & velocity);
-  if(debugBuffer != nullptr) sprintf(&debugBuffer[5], " %2x", (0x7f & velocity));
-  if(written != 1) {
-    if(debugBuffer != nullptr) sprintf(debugBuffer, "MIDI Err #3");
-    return false;
+
+  for(uint8_t i = 0; i < messageSize; ++i) {
+    written = m_pSerial->write(outBuffer[i]);
+    if(written != 1) {
+      if(debugBuffer != nullptr) {
+        sprintf(debugBuffer, "MIDI Write Error");
+      }
+      return false;
+    }
+    if(debugBuffer != nullptr) {
+      sprintf(&debugBuffer[3*i], "%2x ", outBuffer[i]);
+    }
   }
 
   return true;
