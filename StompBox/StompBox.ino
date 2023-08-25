@@ -46,6 +46,7 @@ int g_selectInstrumentChannel;
 uint8_t g_volume;
 unsigned long g_displayBacklightOnTimestamp;
 //const unsigned int c_midiBaudRate = 9600;
+bool g_interrupted;
 
 
 void ISR_1();
@@ -150,6 +151,7 @@ void setup() {
   g_rotarySwitch = new RotarySwitch(config.c_rotarySwitchPin_clk, config.c_rotarySwtichPin_dta, config.c_rotarySwtichPin_btn);
 #endif // USE_ROTARY_SWITCH
   
+  g_interrupted = false;
   g_volume = 0x63;
   g_mode = OperationMode::Mode_Play;
   g_selectInstrumentChannel = -1;
@@ -396,6 +398,7 @@ void loop() {
   /*if(config.c_flashOnTap) {
     g_display->Backlight(false);
   }*/
+  // TODO: Get rid of the counter, replace by comparing milliseconds
   if((counter % 20) == 0) {
     //g_midi->MidiMessage(Midi::MidiCommand::Command_ControlChange, config.c_percussionChannel, 0, 0);
     //g_midi->MidiMessage(Midi::MidiCommand::Command_ControlChange, config.c_percussionChannel, 0, 0x78);
@@ -412,7 +415,10 @@ void loop() {
       //g_midi->MidiMessage(Midi::MidiCommand::Command_ControlChange, config.c_percussionChannel, 0, 0x78);
   }
   ++counter;
-  delay(5); // TODO: replace hardcoded value by configured constant
+  for(int i = 0; (i < 5) && !g_interrupted; ++i) { // TODO: replace hardcoded value by configured constant
+    delay(1);
+    g_interrupted = false;
+  }
 }
 
 void ISR_Input(TapInput& tap) {
@@ -421,6 +427,7 @@ void ISR_Input(TapInput& tap) {
     tap.pushTimestamp = millis();
     tap.state = true;
     tap.handlePush = true;
+    g_interrupted = true;
   }
 }
 
