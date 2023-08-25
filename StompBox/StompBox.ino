@@ -21,6 +21,9 @@ enum DisplaySection {
   Section_Instrument2Mode,
   Section_Instrument2Name,
   Section_PlayMode,
+  Section_SelInstrPrev,
+  Section_SelInstrAct,
+  Section_SelInstrNext,
   Section_Debug,
   Section_About_Product,
   Section_About_Version,
@@ -114,11 +117,11 @@ RotarySwitch* g_rotarySwitch = nullptr;
 #ifdef USE_VS1053
 VS1053b* g_vs1053b = new VS1053b(VS_XCS, VS_XDCS, VS_DREQ, VS_RESET);
 #endif //defined USE_VS1053
-#ifdef DEBUG
+#ifdef DEBUG_MIDI_SERIAL
 char debugBuffer[32];
 #else
 char* debugBuffer = nullptr;
-#endif // DEBUG
+#endif // DEBUG_MIDI_SERIAL
 
 void setup() {
   delay(100);
@@ -143,6 +146,10 @@ void setup() {
   g_display->SetSection(DisplaySection::Section_About_Version, 2, 0, 16);
   g_display->SetSection(DisplaySection::Section_About_Manufacturer, 4, 0, 16);
   g_display->SetSection(DisplaySection::Section_About_Copyright, 6, 0, 16);
+  g_display->SetSection(DisplaySection::Section_SelInstrPrev, 2, 0, 0);
+  g_display->SetSection(DisplaySection::Section_SelInstrAct, 4, 0, 0);
+  g_display->SetSection(DisplaySection::Section_SelInstrNext, 6, 0, 0);
+
 #endif // defined USE_U8G2_DISPLAY
   g_midi->SetDebugBuffer(debugBuffer);
 
@@ -206,6 +213,10 @@ void ShowAbout(unsigned long wait_ms) {
   g_display->WriteSection(DisplaySection::Section_About_Manufacturer, "  (C) Florete   ");
   g_display->WriteSection(DisplaySection::Section_About_Copyright, "      2023      ");
   delay(wait_ms);
+  g_display->WriteSection(DisplaySection::Section_About_Product, "                ");
+  g_display->WriteSection(DisplaySection::Section_About_Version, "                ");
+  g_display->WriteSection(DisplaySection::Section_About_Manufacturer, "                ");
+  g_display->WriteSection(DisplaySection::Section_About_Copyright, "                ");
 }
 
 #ifdef USE_2LINE_I2C_DISPLAY
@@ -260,14 +271,15 @@ void UpdateDisplay(const uint16_t highlightedLines) {
       //((g_mode == OperationMode::Mode_Play) || (g_selectInstrumentChannel != i)) ? "PLAYBACK" : "SEL.INSTR.");
       g_display->WriteSection(DisplaySection::Section_PlayMode, 
         ((g_mode == OperationMode::Mode_Play) ? "    PLAYBACK    " : (g_selectInstrumentChannel ? "   INSTRUMENT  >" : "<  INSTRUMENT   ")));
+        // DisplaySection::Section_SelInstrPrev
 #endif
   }
 }
 
 void DebugToDisplay() {
-#ifdef DEBUG
+#ifdef DEBUG_MIDI_SERIAL
   g_display->WriteSection(DisplaySection::Section_Debug, debugBuffer); 
-#endif // DEBUG
+#endif // DEBUG_MIDI_SERIAL
 }
 
 uint8_t counter = 0;

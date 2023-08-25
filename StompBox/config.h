@@ -6,7 +6,7 @@
 #define USE_U8G2_DISPLAY 1
 //#define USE_2LINE_I2C_DISPLAY
 //#define USE_VS1053
-# define DEBUG
+//# define DEBUG_MIDI_SERIAL
 
 
 #ifdef USE_VS1053
