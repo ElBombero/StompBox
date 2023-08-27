@@ -43,7 +43,7 @@ enum InstrumentSelMode {
 };
 
 struct Config {
-  //const char c_version[] = "1.1.0";
+  //const char c_version[] = "1.1.1";
   const bool c_silenceInstrumentSwitching = false;
   const unsigned long c_longPressTime = 1000; // 1 sec
   const unsigned long c_maxNotePlayTime = 1000; // 1 sec
@@ -59,20 +59,11 @@ struct Config {
   //const unsigned int c_midiBaudRate = 31250;
   //const unsigned int c_midiBaudRate = 9600;
   const uint8_t c_volumePin = A0;
-#ifdef USE_2LINE_I2C_DISPLAY
-  const unsigned long c_displayBacklightOnTimeout = 5000;
-  const DisplayBacklightMode c_displayBacklightMode = DisplayBacklightMode::Backlight_PlayFlash_ModeOn;
-  const uint8_t c_i2cDisplayAddress = 0x27;
-  const uint8_t c_i2cDisplayRows = 2;
-  const uint8_t c_i2cDisplayCols = 16;
-  const uint8_t c_displayContrast = 0xff;
-#elif defined USE_U8G2_DISPLAY
   const uint8_t c_u8x8DisplayRows = 4;
   const uint8_t c_u8x8DisplayCols = 16;
   const uint8_t c_displayContrast = 0xff;
   //const InstrumentSelMode c_instrumentSelMode = InstrumentSelMode::InstrSelMode_1Line;
   const InstrumentSelMode c_instrumentSelMode = InstrumentSelMode::InstrSelMode_3Lines;
-#endif
 #ifdef USE_ROTARY_SWITCH
   const uint8_t c_rotarySwitchPin_clk = 8;
   const uint8_t c_rotarySwtichPin_dta = 7;
