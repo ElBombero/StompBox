@@ -2,11 +2,7 @@
 #include "midi.h"
 #include "utils.h"
 #include "config.h"
-#ifdef USE_2LINE_I2C_DISPLAY
-#include "lcd_i2c_display.h"
-#elif defined USE_U8G2_DISPLAY
 #include "u8g2_display.h"
-# endif // defined USE_U8G2_DISPLAY
 #ifdef USE_ROTARY_SWITCH
 #include "rotarySwitch.h"
 #endif // USE_ROTARY_SWITCH
@@ -16,11 +12,9 @@
 #endif //defined USE_VS1053
 
 enum DisplaySection {
-  Section_Instrument1Mode,
   Section_Instrument1Name,
-  Section_Instrument2Mode,
   Section_Instrument2Name,
-  Section_PlayMode,
+  Section_OperationMode,
   Section_SelInstrPrev,
   Section_SelInstrAct,
   Section_SelInstrNext,
@@ -57,7 +51,8 @@ void ISR_2();
 
 struct TapInput {
   TapInput(unsigned int isrPin, void (*isr)(), uint8_t initMidiKey,
-    DisplaySection displaySctPlay, DisplaySection displaySctName,
+    //DisplaySection displaySctPlay, 
+    DisplaySection displaySctName,
     Midi::PercussionChange instrChangeOper) :
     isrGpioPin(isrPin),
     isrHandler(isr),
@@ -65,7 +60,7 @@ struct TapInput {
     instrumentChangeOper(instrChangeOper),
     midiKey(initMidiKey),
     handlePush(false),
-    displaySectionMode(displaySctPlay),
+    //displaySectionMode(displaySctPlay),
     displaySectionName(displaySctName),
     //upCounter(0),
     modeChangeEnable(true),
@@ -88,7 +83,7 @@ struct TapInput {
   bool handlePush;
   uint8_t midiKey;
   //unsigned int upCounter;
-  DisplaySection displaySectionMode;
+  //DisplaySection displaySectionMode;
   DisplaySection displaySectionName;
   unsigned long pushTimestamp;
   Midi::PercussionChange instrumentChangeOper;
@@ -99,18 +94,14 @@ struct TapInput {
 };
 
 TapInput g_tapInput[] = {
-  TapInput(2, &ISR_1, Midi::PercussionKey::Tambourine, Section_Instrument1Mode,
+  TapInput(2, &ISR_1, Midi::PercussionKey::Tambourine, //Section_Instrument1Mode,
     Section_Instrument1Name, Midi::PercussionChange::Change_Previous),
-  TapInput(3, &ISR_2, Midi::PercussionKey::Claves, Section_Instrument2Mode,
+  TapInput(3, &ISR_2, Midi::PercussionKey::Claves, //Section_Instrument2Mode,
     Section_Instrument2Name, Midi::PercussionChange::Change_Next)
 };
 
 Midi* g_midi = nullptr;
-#ifdef USE_2LINE_I2C_DISPLAY
-I2cDisplay* g_display = nullptr;
-#elif defined USE_U8G2_DISPLAY
 U8x8Display* g_display = nullptr;
-#endif // defined USE_U8G2_DISPLAY
 #ifdef USE_ROTARY_SWITCH
 RotarySwitch* g_rotarySwitch = nullptr;
 #endif // USE_ROTARY_SWITCH
@@ -128,29 +119,19 @@ void setup() {
   pinMode(config.c_volumePin, INPUT); //INPUT_PULLUP);
   //Wire.begin();
   g_midi = new Midi(config.c_midiConnectionMode, config.c_skipSameMidiCommands, config.c_skipSameMidiCommandsPeriod, &Serial);
-#ifdef USE_2LINE_I2C_DISPLAY
-  g_display = new I2cDisplay(config.c_i2cDisplayAddress, config.c_i2cDisplayRows, config.c_i2cDisplayCols);
-  g_display->SetSection(DisplaySection::Section_Instrument1Mode, 0, 0, 1);
-  g_display->SetSection(DisplaySection::Section_Instrument1Name, 0, 1, 15);
-  g_display->SetSection(DisplaySection::Section_Instrument2Mode, 1, 0, 1);
-  g_display->SetSection(DisplaySection::Section_Instrument2Name, 1, 1, 15);
-#elif defined USE_U8G2_DISPLAY
   g_display = new U8x8Display(new U8X8_SSD1306_128X64_NONAME_HW_I2C(U8X8_PIN_NONE), config.c_u8x8DisplayRows, config.c_u8x8DisplayCols);
-  g_display->SetSection(DisplaySection::Section_Instrument1Mode, 2, 0, 0);
   g_display->SetSection(DisplaySection::Section_Instrument1Name, 2, 0, 16);
-  g_display->SetSection(DisplaySection::Section_Instrument2Mode, 4, 0, 0);
   g_display->SetSection(DisplaySection::Section_Instrument2Name, 4, 0, 16);
-  g_display->SetSection(DisplaySection::Section_PlayMode, 0, 0, 16); //, u8x8_font_px437wyse700b_2x2_f);
+  g_display->SetSection(DisplaySection::Section_OperationMode, 0, 0, 16); //, u8x8_font_px437wyse700b_2x2_f);
   g_display->SetSection(DisplaySection::Section_Debug, 6, 0, 16);
   g_display->SetSection(DisplaySection::Section_About_Product, 0, 0, 16); //, u8x8_font_px437wyse700b_2x2_f);
   g_display->SetSection(DisplaySection::Section_About_Version, 2, 0, 16);
   g_display->SetSection(DisplaySection::Section_About_Manufacturer, 4, 0, 16);
   g_display->SetSection(DisplaySection::Section_About_Copyright, 6, 0, 16);
-  g_display->SetSection(DisplaySection::Section_SelInstrPrev, 2, 0, 0);
-  g_display->SetSection(DisplaySection::Section_SelInstrAct, 4, 0, 0);
-  g_display->SetSection(DisplaySection::Section_SelInstrNext, 6, 0, 0);
+  g_display->SetSection(DisplaySection::Section_SelInstrPrev, 2, 0, 16);
+  g_display->SetSection(DisplaySection::Section_SelInstrAct, 4, 0, 16);
+  g_display->SetSection(DisplaySection::Section_SelInstrNext, 6, 0, 16);
 
-#endif // defined USE_U8G2_DISPLAY
   g_midi->SetDebugBuffer(debugBuffer);
 
 
@@ -162,10 +143,6 @@ void setup() {
   g_volume = 0x63;
   g_mode = OperationMode::Mode_Play;
   g_selectInstrumentChannel = -1;
-#ifdef USE_2LINE_I2C_DISPLAY
-  SetDisplayBacklight(EventType::Event_ModeChanged);
-  g_display->Backlight(true);
-#endif // defined USE_2LINE_I2C_DISPLAY
   g_display->SetContrast(config.c_displayContrast);
 //  g_display->Write(0, 1, "Stompie v0.1.0");
 //  g_display->Write(1, 0, "(C) Florete, 2023");
@@ -175,7 +152,7 @@ void setup() {
   //delay(2000);
   g_display->Backlight(false);
 #ifdef USE_U8G2_DISPLAY
-  g_display->WriteSection(DisplaySection::Section_PlayMode, "    PLAYBACK    ");
+  g_display->WriteSection(DisplaySection::Section_OperationMode, "    PLAYBACK    ");
 #endif // defined USE_U8G2_DISPLAY
 
 #ifdef USE_VS1053
@@ -219,60 +196,43 @@ void ShowAbout(unsigned long wait_ms) {
   g_display->WriteSection(DisplaySection::Section_About_Copyright, "                ");
 }
 
-#ifdef USE_2LINE_I2C_DISPLAY
-void SetDisplayBacklight(EventType event) {
-  bool backlight = false;
-  unsigned long now = millis();
-  switch(config.c_displayBacklightMode) {
-    case DisplayBacklightMode::Backlight_AlwaysOn:
-      backlight = true; break;
-    case DisplayBacklightMode::Backlight_AlwaysOnWithTimeout:
-      backlight = ((now - g_displayBacklightOnTimestamp) < config.c_displayBacklightOnTimeout);
-      if(event != EventType::Event_StopPlay) {
-        g_displayBacklightOnTimestamp = now;
+void UpdateDisplay(const uint16_t highlightedLines) {
+  switch(g_mode) {
+    case OperationMode::Mode_Play: {
+        g_display->WriteSection(DisplaySection::Section_OperationMode, "    PLAYBACK    ");
+        for(uint8_t i = 0; i < config.c_channelsCount; ++i) {
+            char buffer[32];
+            Midi::GetPercussionName(static_cast<Midi::PercussionKey>(g_tapInput[i].midiKey), buffer, 32);
+            g_display->WriteSection(g_tapInput[i].displaySectionName, buffer, ((highlightedLines & (1 << i)) != 0));
+        }
+        g_display->WriteSection(DisplaySection::Section_SelInstrNext, "                "); // TODO: change name to 3rd_line or so 
       }
       break;
-    case DisplayBacklightMode::Backlight_PlayOff_ModeOn:
-      backlight = (g_mode == OperationMode::Mode_SelectInstrument); break;
-    case DisplayBacklightMode::Backlight_PlayFlash:
-      switch(g_mode) {
-        case OperationMode::Mode_Play:
-          backlight = (event == EventType::Event_StartPlay); break;
-      }; break;
-    case DisplayBacklightMode::Backlight_PlayFlash_ModeOn:
-      switch(g_mode) {
-        case OperationMode::Mode_SelectInstrument:
-          backlight = true; break;
-        case OperationMode::Mode_Play:
-          backlight = (event == EventType::Event_StartPlay); break;
-      }; break;
-    default:
+    case OperationMode::Mode_SelectInstrument: {
+        g_display->WriteSection(DisplaySection::Section_OperationMode, (g_selectInstrumentChannel ? "   INSTRUMENT  >" : "<  INSTRUMENT   "));
+        switch(config.c_instrumentSelMode) {
+          case InstrumentSelMode::InstrSelMode_1Line: {
+              for(uint8_t i = 0; i < config.c_channelsCount; ++i) {
+                  char buffer[32];
+                  Midi::GetPercussionName(static_cast<Midi::PercussionKey>(g_tapInput[i].midiKey), buffer, 32);
+                  g_display->WriteSection(g_tapInput[i].displaySectionName, buffer, (g_selectInstrumentChannel == i));
+              }
+              g_display->WriteSection(DisplaySection::Section_SelInstrNext, "                "); // TODO: change name to 3rd_line or so
+            }
+            break;
+          case InstrumentSelMode::InstrSelMode_3Lines: {
+              char buffer[32];
+              Midi::GetPercussionName(static_cast<Midi::PercussionKey>(g_tapInput[g_selectInstrumentChannel].midiKey), buffer, 32);
+              g_display->WriteSection(DisplaySection::Section_SelInstrAct, buffer, true);
+              Midi::GetPercussionName(Midi::ChangePercussion(g_tapInput[g_selectInstrumentChannel].midiKey, Midi::PercussionChange::Change_Previous), buffer, 32);
+              g_display->WriteSection(DisplaySection::Section_SelInstrPrev, buffer);
+              Midi::GetPercussionName(Midi::ChangePercussion(g_tapInput[g_selectInstrumentChannel].midiKey, Midi::PercussionChange::Change_Next), buffer, 32);
+              g_display->WriteSection(DisplaySection::Section_SelInstrNext, buffer);
+            }
+            break;
+        }
+      }
       break;
-  }
-  /*if(backlight) {
-      g_displayBacklightOnTimestamp = now;
-  }*/
-  g_display->Backlight(backlight);
-}
-#endif // define USE_2LINE_I2C_DISPLAY
-
-void UpdateDisplay(const uint16_t highlightedLines) {
-  for(uint8_t i = 0; i < config.c_channelsCount; ++i) {
-    bool highlightedLine = ((highlightedLines & (1 << i)) != 0);
-    highlightedLine |= (g_mode == OperationMode::Mode_SelectInstrument) && (g_selectInstrumentChannel == i);
-      char buffer[32];
-      Midi::GetPercussionName(static_cast<Midi::PercussionKey>(g_tapInput[i].midiKey), buffer, 32);
-      g_display->WriteSection(g_tapInput[i].displaySectionName, buffer, highlightedLine);
-#ifdef USE_2LINE_I2C_DISPLAY
-      g_display->WriteSection(g_tapInput[i].displaySectionMode,
-        ((g_mode == OperationMode::Mode_Play) || (g_selectInstrumentChannel != i)) ? " " : ">");
-#elif defined USE_U8G2_DISPLAY
-      //g_display->WriteSection(DisplaySection::Section_PlayMode,
-      //((g_mode == OperationMode::Mode_Play) || (g_selectInstrumentChannel != i)) ? "PLAYBACK" : "SEL.INSTR.");
-      g_display->WriteSection(DisplaySection::Section_PlayMode, 
-        ((g_mode == OperationMode::Mode_Play) ? "    PLAYBACK    " : (g_selectInstrumentChannel ? "   INSTRUMENT  >" : "<  INSTRUMENT   ")));
-        // DisplaySection::Section_SelInstrPrev
-#endif
   }
 }
 
@@ -402,9 +362,6 @@ void loop() {
 */
     g_volume = 0x7f; // TMP!!!
 #endif // USE_ROTARY_SWITCH
-#ifdef USE_2LINE_I2C_DISPLAY
-    SetDisplayBacklight(EventType::Event_StopPlay);
-#endif //defined USE_2LINE_I2C_DISPLAY
   }
   
   /*if(config.c_flashOnTap) {

@@ -4,8 +4,7 @@
 //#define USE_ROTARY_SWITCH
 //#define MIDIUSB_SUPPORTED
 #define USE_U8G2_DISPLAY 1
-//#define USE_2LINE_I2C_DISPLAY
-//#define USE_VS1053
+#define USE_VS1053
 //# define DEBUG_MIDI_SERIAL
 
 
@@ -16,7 +15,6 @@
 #define VS_DREQ   9 // 2 // Data Request Pin: Player asks for more data
 #define VS_RESET  6 // 8 // Reset is active low
 #endif //defined USE_VS1053
-
 
 
 /*
@@ -38,16 +36,11 @@ Known issues:
 - unwanted immediate instrument change on mode switch from play to instrument-change mode
 */
 
-#ifdef USE_2LINE_I2C_DISPLAY
-enum DisplayBacklightMode {
-  Backlight_AlwaysOff             = 0,
-  Backlight_PlayOff_ModeOn        = 1,
-  Backlight_PlayFlash             = 2,
-  Backlight_PlayFlash_ModeOn      = 3,
-  Backlight_AlwaysOnWithTimeout   = 4,
-  Backlight_AlwaysOn              = 5
+
+enum InstrumentSelMode {
+  InstrSelMode_1Line,
+  InstrSelMode_3Lines
 };
-#endif // defined USE_2LINE_I2C_DISPLAY
 
 struct Config {
   //const char c_version[] = "1.1.0";
@@ -77,6 +70,8 @@ struct Config {
   const uint8_t c_u8x8DisplayRows = 4;
   const uint8_t c_u8x8DisplayCols = 16;
   const uint8_t c_displayContrast = 0xff;
+  //const InstrumentSelMode c_instrumentSelMode = InstrumentSelMode::InstrSelMode_1Line;
+  const InstrumentSelMode c_instrumentSelMode = InstrumentSelMode::InstrSelMode_3Lines;
 #endif
 #ifdef USE_ROTARY_SWITCH
   const uint8_t c_rotarySwitchPin_clk = 8;
